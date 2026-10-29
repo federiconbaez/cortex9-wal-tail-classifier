@@ -1,0 +1,59 @@
+# Pre-registration for cortex9-wal-tail-classifier.
+# Committed and pushed to the public repository BEFORE any measurement.
+# The measurement binary reads this file; changing it after the push is a
+# protocol deviation and must be reported as such.
+
+[device]
+sector_bytes = 512
+# Fraction of trials whose log region starts filled with valid sectors of a
+# previous epoch (a recycled log file); the rest start zero-filled.
+recycled_fraction = 0.5
+
+[workload]
+# Batches acknowledged (fsync returned) before the crash: uniform [min, max].
+acked_batches_min = 1
+acked_batches_max = 32
+# Records per batch: uniform [min, max].
+records_per_batch_min = 1
+records_per_batch_max = 16
+# Payload bytes per record: uniform [min, max].
+payload_min = 256
+payload_max = 2048
+
+[faults]
+# Exactly one fault per crash. Fractions of the main run:
+torn_tail = 0.50
+bit_flip = 0.25
+misdirected_write = 0.25
+# Torn tail: the crash interrupts the write of one more (never acknowledged)
+# batch. Each write unit of that batch persists independently with this
+# probability; the unit is 512 B or 4096 B with equal probability.
+torn_unit_persist_p = 0.5
+# Bit flip: 1..=8 bits flipped in one sector of the acknowledged extent.
+bit_flip_bits_min = 1
+bit_flip_bits_max = 8
+# Corruption faults (bit flip, misdirected write) hit the last acknowledged
+# batch with this probability, otherwise a uniform sector of the
+# acknowledged extent.
+corrupt_last_batch_p = 0.5
+# Misdirected write: one acknowledged sector is overwritten by the image of a
+# different acknowledged sector (a write that landed at the wrong address).
+
+[run]
+main_seeds_start = 0
+main_seeds_count = 100000
+negative_control_seeds_start = 1000000
+negative_control_seeds_count = 10000
+mmap_wal_log_control_seeds_start = 0
+mmap_wal_log_control_seeds_count = 1000
+
+[thresholds]
+# Every corruption of acknowledged data is reported (never truncated
+# silently, never reported clean).
+confirmed_corruption_detected_min = 1.0
+# Torn tails recovered automatically with every acknowledged record intact.
+torn_tail_recovered_min = 0.99
+# Extra bytes written vs the baseline format (same batching and padding).
+bytes_overhead_max = 0.05
+# Negative control: trials without faults that produce any report.
+negative_control_reports_max = 0
