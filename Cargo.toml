@@ -1,0 +1,15 @@
+[package]
+name = "wal-tail-classifier"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "Apache-2.0"
+description = "Single-node WAL whose recovery tells a torn tail from corruption of committed records"
+repository = "https://github.com/federiconbaez/cortex9-wal-tail-classifier"
+
+[dependencies]
+# Positive control: the torn-tail heuristic of a real WAL, pinned.
+mmap-wal-log = { git = "https://github.com/federiconbaez/mmap-wal-log", rev = "739ec7eaf2fec9e4a48e16d8b103d3f5cc5f9cf2" }
+
+[profile.release]
+debug = 1
